@@ -53,6 +53,7 @@ import org.catrobat.catroid.merge.ImportProjectHelper
 import org.catrobat.catroid.stage.StageActivity
 import org.catrobat.catroid.stage.TestResult
 import org.catrobat.catroid.ui.BottomBar.showBottomBar
+import org.catrobat.catroid.ui.aiassist.AiAssistFragment
 import org.catrobat.catroid.ui.controller.BackpackListManager
 import org.catrobat.catroid.ui.controller.ActorsAndObjectsManager
 import org.catrobat.catroid.ui.dialogs.LegoSensorConfigInfoDialog
@@ -113,6 +114,9 @@ class ProjectActivity : BaseCastActivity() {
         showWarningForSuspiciousBricksOnce(this)
         showLegoSensorConfigInfo()
         binding.bottomBar.apply {
+            buttonAiAssist.setOnClickListener {
+                handleAiAssistButton()
+            }
             buttonAdd.setOnClickListener {
                 handleAddButton()
             }
@@ -331,6 +335,21 @@ class ProjectActivity : BaseCastActivity() {
         NewSpriteDialogFragment(
             true, lookDataName, currentFragment!!
         ).show(supportFragmentManager, NewSpriteDialogFragment.TAG)
+    }
+
+    private fun handleAiAssistButton() {
+        val bundle = Bundle()
+//        bundle.putString("structure", ProjectManager.getAllList(projectManager.currentProject))
+        bundle.putString("structure", ProjectManager.getAllListAsJsonString(projectManager.currentProject))
+
+        val aiAssistFragment = AiAssistFragment()
+        aiAssistFragment.setArguments(bundle)
+
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, aiAssistFragment, AiAssistFragment.TAG)
+            .addToBackStack(AiAssistFragment.TAG)
+            .commit()
     }
 
     private fun handleAddButton() {

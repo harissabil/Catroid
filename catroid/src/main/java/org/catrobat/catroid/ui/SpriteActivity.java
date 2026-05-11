@@ -58,6 +58,7 @@ import org.catrobat.catroid.pocketmusic.PocketMusicActivity;
 import org.catrobat.catroid.soundrecorder.SoundRecorderActivity;
 import org.catrobat.catroid.stage.StageActivity;
 import org.catrobat.catroid.stage.TestResult;
+import org.catrobat.catroid.ui.aiassist.AiAssistFragment;
 import org.catrobat.catroid.ui.controller.RecentBrickListManager;
 import org.catrobat.catroid.ui.fragment.AddBrickFragment;
 import org.catrobat.catroid.ui.fragment.BrickCategoryFragment;
@@ -246,7 +247,11 @@ public class SpriteActivity extends BaseActivity {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (getCurrentFragment() instanceof ScriptFragment) {
+		if (getCurrentFragment() instanceof AiAssistFragment) {
+			for (int i = 0; i < menu.size(); i++) {
+				menu.getItem(i).setVisible(false);
+			}
+		} else if (getCurrentFragment() instanceof ScriptFragment) {
 			menu.findItem(R.id.comment_in_out).setVisible(true);
 			showUndo(isUndoMenuItemVisible);
 		} else if (getCurrentFragment() instanceof LookListFragment) {
@@ -639,7 +644,18 @@ public class SpriteActivity extends BaseActivity {
 	}
 
 	public void handleAiAssistButton(View view) {
-		Log.d(TAG, "Here a Flutter module will be called in the future.");
+		Bundle bundle = new Bundle();
+		bundle.putString("structure", ProjectManager.getAllList(projectManager.getCurrentProject()));
+//		bundle.putString("structure", ProjectManager.getAllListAsJsonString(projectManager.getCurrentProject()));
+
+		AiAssistFragment aiAssistFragment = new AiAssistFragment();
+		aiAssistFragment.setArguments(bundle);
+
+		getSupportFragmentManager()
+				.beginTransaction()
+				.replace(R.id.fragment_container, aiAssistFragment, AiAssistFragment.Companion.getTAG())
+				.addToBackStack(AiAssistFragment.Companion.getTAG())
+				.commit();
 	}
 
 	public void handleAddButton(View view) {
