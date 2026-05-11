@@ -53,6 +53,7 @@ import org.catrobat.catroid.formulaeditor.UserData;
 import org.catrobat.catroid.formulaeditor.UserList;
 import org.catrobat.catroid.formulaeditor.UserVariable;
 import org.catrobat.catroid.io.StorageOperations;
+import org.catrobat.catroid.io.XstreamSerializer;
 import org.catrobat.catroid.io.asynctask.ProjectSaver;
 import org.catrobat.catroid.pocketmusic.PocketMusicActivity;
 import org.catrobat.catroid.soundrecorder.SoundRecorderActivity;
@@ -644,18 +645,56 @@ public class SpriteActivity extends BaseActivity {
 	}
 
 	public void handleAiAssistButton(View view) {
-		Bundle bundle = new Bundle();
-		bundle.putString("structure", ProjectManager.getAllList(projectManager.getCurrentProject()));
-//		bundle.putString("structure", ProjectManager.getAllListAsJsonString(projectManager.getCurrentProject()));
-
-		AiAssistFragment aiAssistFragment = new AiAssistFragment();
-		aiAssistFragment.setArguments(bundle);
-
-		getSupportFragmentManager()
-				.beginTransaction()
-				.replace(R.id.fragment_container, aiAssistFragment, AiAssistFragment.Companion.getTAG())
-				.addToBackStack(AiAssistFragment.Companion.getTAG())
-				.commit();
+		String[] options = {
+			getString(R.string.ai_assist_format_tree),
+			getString(R.string.ai_assist_format_json),
+			getString(R.string.ai_assist_format_xml),
+			getString(R.string.ai_assist_format_tree_sprite),
+			getString(R.string.ai_assist_format_json_sprite),
+			getString(R.string.ai_assist_format_xml_sprite),
+			getString(R.string.ai_assist_format_summary)
+		};
+		new AlertDialog.Builder(this)
+			.setTitle(R.string.ai_assist_choose_format)
+			.setItems(options, (dialog, which) -> {
+				Project project = projectManager.getCurrentProject();
+				Sprite sprite = projectManager.getCurrentSprite();
+				String structure;
+				switch (which) {
+					case 0:
+						structure = ProjectManager.getAllList(project);
+						break;
+					case 1:
+						structure = ProjectManager.getAllListAsJsonString(project);
+						break;
+					case 2:
+						structure = XstreamSerializer.getInstance().getXmlAsStringFromProject(project);
+						break;
+					case 3:
+						structure = ProjectManager.getAllListForSprite(sprite);
+						break;
+					case 4:
+						structure = ProjectManager.getAllListAsJsonStringForSprite(sprite);
+						break;
+					case 5:
+						structure = XstreamSerializer.getInstance().getXmlAsStringFromSprite(sprite);
+						break;
+					default:
+						structure = ProjectManager.getProjectSummary(project);
+						break;
+				}
+				Bundle bundle = new Bundle();
+				bundle.putString("structure", structure);
+				AiAssistFragment aiAssistFragment = new AiAssistFragment();
+				aiAssistFragment.setArguments(bundle);
+				getSupportFragmentManager()
+					.beginTransaction()
+					.replace(R.id.fragment_container, aiAssistFragment, AiAssistFragment.Companion.getTAG())
+					.addToBackStack(AiAssistFragment.Companion.getTAG())
+					.commit();
+			})
+			.setNegativeButton(R.string.cancel, null)
+			.show();
 	}
 
 	public void handleAddButton(View view) {
