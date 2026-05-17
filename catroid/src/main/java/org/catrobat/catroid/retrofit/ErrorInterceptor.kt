@@ -25,7 +25,7 @@ package org.catrobat.catroid.retrofit
 
 import okhttp3.Interceptor
 import okhttp3.Response
-import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 
 class ErrorInterceptor : Interceptor {
 
@@ -33,12 +33,12 @@ class ErrorInterceptor : Interceptor {
         val response = chain.proceed(chain.request())
 
         if (response.isSuccessful.not() and response.isRedirect.not()) {
-            val contentType = response.body()?.contentType()
-            val body = response.body()?.toString() ?: ""
+            val contentType = response.body?.contentType()
+            val body = response.body?.toString() ?: ""
 
             return response.newBuilder()
-                .body(ResponseBody.create(contentType, body))
-                .code(response.code())
+                .body(body.toResponseBody(contentType))
+                .code(response.code)
                 .build()
         }
         return response
